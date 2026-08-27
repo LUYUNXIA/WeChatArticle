@@ -10,3 +10,10 @@
 ## 数据基线
 
 样本尚不足。系统使用最近 5 篇有效数据的中位数作为动态基线；不足 5 篇时仅输出观察，不认定长期规律。
+
+## 数据接口能力
+
+- 2026-08-27 已验证 AppID、AppSecret 和 API IP 白名单有效；
+- 当前账号只有基础接口权限，没有图文分析和用户分析接口权限；
+- `getarticletotal`、`getarticlesummary`、`getusersummary`、`getusercumulate` 均返回 `api unauthorized`；
+- 当前默认数据入口为微信公众号后台导出文件或人工维护的 `运营数据看板.csv`；获得新的接口权限后再启用自动 API 采集。
