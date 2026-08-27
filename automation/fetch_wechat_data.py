@@ -16,7 +16,12 @@ def request_json(url: str, payload: dict | None = None) -> dict:
     with urllib.request.urlopen(request, timeout=30) as response:
         result = json.loads(response.read().decode("utf-8"))
     if result.get("errcode", 0) != 0:
-        raise RuntimeError(f"微信接口错误 {result.get('errcode')}: {result.get('errmsg')}")
+        code, message = result.get("errcode"), result.get("errmsg")
+        if code == 40164:
+            raise RuntimeError(f"调用 IP 未加入微信 API 白名单：{message}")
+        if code in (48001, 48004):
+            raise RuntimeError(f"公众号没有该数据接口权限：{message}")
+        raise RuntimeError(f"微信接口错误 {code}: {message}")
     return result
 
 
@@ -33,7 +38,14 @@ def main() -> None:
     token = request_json(f"https://api.weixin.qq.com/cgi-bin/token?{query}")["access_token"]
     payload = {"begin_date": args.date, "end_date": args.date}
     endpoints = ["getarticletotal", "getarticlesummary", "getusersummary", "getusercumulate"]
-    output = {name: request_json(f"https://api.weixin.qq.com/datacube/{name}?access_token={token}", payload) for name in endpoints}
+    output = {}
+    for name in endpoints:
+        try:
+            output[name] = request_json(f"https://api.weixin.qq.com/datacube/{name}?access_token={token}", payload)
+            print(f"{name}: 成功")
+        except RuntimeError as exc:
+            output[name] = {"error": str(exc)}
+            print(f"{name}: {exc}")
     save_json(RAW / f"wechat-{args.date}.json", output)
     print(f"已获取 {args.date} 数据：data/raw/wechat-{args.date}.json")
 
