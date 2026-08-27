@@ -36,6 +36,8 @@ desktop.ini
 !.env.example
 data/raw/*.json
 !data/raw/.gitkeep
+data/imports/*
+!data/imports/.gitkeep
 
 # Python 缓存
 __pycache__/

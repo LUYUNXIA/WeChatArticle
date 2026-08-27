@@ -151,6 +151,35 @@ python -X utf8 automation/run_pipeline.py
 python -X utf8 automation/record_snapshot.py --id 1 --checkpoint T+1 --送达人数 100 --阅读人数 40 --分享人数 3 --收藏人数 5
 ```
 
+### 收集后台下载文件
+
+微信后台的内容分析和用户分析下载依赖网页登录态，当前账号又没有对应统计 API，因此默认采用“浏览器点击下载、程序自动收集”的稳定方式。完成后台下载后运行：
+
+```bash
+python -X utf8 automation/collect_downloads.py
+```
+
+程序默认扫描 Windows 的 `Downloads` 目录，把最近 24 小时的 CSV、XLS、XLSX、ZIP 文件按内容哈希去重后复制到 `data/imports/`。如果浏览器下载目录不同，可在本地 `.env` 配置：
+
+```dotenv
+WECHAT_DOWNLOAD_DIR=D:\Downloads
+```
+
+也可以先预览而不复制：
+
+```bash
+python -X utf8 automation/collect_downloads.py --dry-run
+```
+
+`data/imports/` 中的微信原始导出文件已被 Git 忽略，不会上传。当前已适配微信导出的传统 XLS 内容趋势文件和 HTML 格式用户分析文件。运行 `automation/run_pipeline.py` 时会生成：
+
+- `data/wechat_content_metrics.csv`：按文章标题和传播渠道统计的阅读数据；
+- `data/wechat_daily_metrics.csv`：账号每日阅读、分享、收藏及发表篇数；
+- `data/wechat_user_metrics.csv`：每日新增、取关、净增和累计关注；
+- `data/article_metrics.csv`：与本项目文章标题精确匹配后的综合指标。
+
+账号每日数据不会强行归因到某一篇文章；只有标题和发布日期都精确匹配时，文章级阅读来源才会写入运营看板。
+
 ## 封面与配图规范
 
 - 公众号头条封面先制作 2.35:1 高清宽幅原图，再导出为精确的 900×383 PNG；
