@@ -131,6 +131,26 @@ python -X utf8 automation/fetch_wechat_data.py --date 2026-08-26
 
 当前公众号已验证可以获取接口调用凭据，但平台没有授予图文分析和用户分析权限，相关统计接口会返回 `api unauthorized`。在权限发生变化前，项目使用微信公众号后台导出数据或 `运营数据看板.csv` 作为数据来源，后续的指标计算、诊断、实验建议和知识沉淀仍然自动完成。
 
+### 无统计接口权限时录入数据
+
+在公众号后台查看文章数据后，运行快照录入工具：
+
+```bash
+python -X utf8 automation/record_snapshot.py
+```
+
+程序会提示选择文章编号、T+1/T+3/T+7 检查点，并逐项录入后台数字；暂时看不到的指标可以直接回车留空。每次记录都会追加到 `data/metric_snapshots.csv`，不会覆盖旧快照。随后运行完整流程：
+
+```bash
+python -X utf8 automation/run_pipeline.py
+```
+
+系统会选择每篇文章最新的检查点，更新 `运营数据看板.csv`，自动计算各项比例并生成诊断报告。也可以使用命令参数完成非交互录入，例如：
+
+```bash
+python -X utf8 automation/record_snapshot.py --id 1 --checkpoint T+1 --送达人数 100 --阅读人数 40 --分享人数 3 --收藏人数 5
+```
+
 ## 封面与配图规范
 
 - 公众号头条封面先制作 2.35:1 高清宽幅原图，再导出为精确的 900×383 PNG；
